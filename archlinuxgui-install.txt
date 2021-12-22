@@ -1,0 +1,188 @@
+
+
+
+
+Arch Linux GUI
+
+https://archlinuxgui.in/
+
+
+# Add Neofetch to .bashrc
+
+echo neofetch >> .bashrc
+
+
+# Disable single-click
+# Type General Behaviour in Krunner and the option should be under Click behaviour.
+
+
+# Enable multilib in the pacman config by uncommenting these two lines in pacman.conf:
+
+nano /etc/pacman.conf
+
+[multilib]
+Include = /etc/pacman.d/mirrorlist
+
+# Upgrade your system:
+
+sudo pacman -Syyu
+
+# Show 32-bit packages in the multilib repository:
+
+pacman -Sl | grep -i lib32
+pacman -Sl multilib
+
+sudo pacman -S nvidia nvidia-utils nvidia-settings xorg-server-devel opencl-nvidia
+
+# Verify blacklist nouveau
+
+cat /usr/lib/modprobe.d/nvidia.conf
+
+# If not add sudo bash -c “echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf
+
+# Reboot your computer and use nvidia-smicommand which reads temps directly from the GPU without the need to use X at all.
+
+sudo nvidia-smi
+sudo nvidia-smi -q -d TEMPERATURE
+
+# Install some packages
+
+sudo pacman -S btop htop cmatrix
+sudo pacman -S chromium firefox vivaldi
+sudo pacman -S filezilla keepassxc qbittorrent vlc
+sudo pacman -S steam playonlinux wine winetricks wine-staging
+
+
+pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+
+yay -S pamac-aur
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+#!/usr/bin/env bash
+
+# Add sudo no password rights
+sed -i 's/^# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
+
+#Add parallel downloading
+sed -i 's/^#Para/Para/' /etc/pacman.conf
+
+#Enable multilib
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+pacman -Sy --noconfirm
+
+PKGS=(
+'base-devel'
+'fakeroot'
+'packagekit-qt5'
+'git'
+'wget'
+'yajl'
+'ark'
+'traceroute'
+'ufw'
+'unrar'
+'unzip'
+'usbutils'
+'btop'
+'htop'
+'cmatrix'
+'filezilla'
+'keepassxc'
+'qbittorrent'
+'vlc'
+'mplayer'
+'simplescreenrecorder'
+'obs-studio'
+'kdenlive'
+'audacity'
+'steam'
+'lutris'
+'playonlinux'
+'wine-gecko'
+'wine-mono'
+'winetricks'
+)
+
+for PKG in "${PKGS[@]}"; do
+    echo "INSTALLING: ${PKG}"
+    sudo pacman -S "$PKG" --noconfirm --needed
+done
+
+echo "CLONING: YAY"
+cd /tmp
+git clone "https://aur.archlinux.org/yay.git"
+cd /tmp/yay
+makepkg -si --noconfirm
+# rm -rf /tmp/yay
+
+echo "CLONING: GOOGLE CHROME"
+cd /tmp
+git clone https://aur.archlinux.org/google-chrome.git
+cd /tmp/google-chrome
+makepkg -si --noconfirm
+# rm -rf /tmp/google-chrome
+
+#
+# determine processor type and install microcode
+# 
+proc_type=$(lscpu | awk '/Vendor ID:/ {print $3}')
+case "$proc_type" in
+	GenuineIntel)
+		print "Installing Intel microcode"
+		pacman -S --noconfirm intel-ucode
+		proc_ucode=intel-ucode.img
+		;;
+	AuthenticAMD)
+		print "Installing AMD microcode"
+		pacman -S --noconfirm amd-ucode
+		proc_ucode=amd-ucode.img
+		;;
+esac	
+
+# Graphics Drivers find and install
+if lspci | grep -E "NVIDIA|GeForce"; then
+    pacman -S nvidia nvidia-utils nvidia-settings xorg-server-devel opencl-nvidia --noconfirm --needed
+	nvidia-xconfig
+elif lspci | grep -E "Radeon"; then
+    pacman -S xf86-video-amdgpu --noconfirm --needed
+elif lspci | grep -E "Integrated Graphics Controller"; then
+    pacman -S libva-intel-driver libvdpau-va-gl lib32-vulkan-intel vulkan-intel libva-intel-driver libva-utils --needed --noconfirm
+fi
+
+# Remove no password sudo rights
+sed -i 's/^%wheel ALL=(ALL) NOPASSWD: ALL/# %wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
+
+///////////////////////////////////////////////////////////////////////////////////
+
+https://github.com/ChrisTitusTech/ArchTitus
+
+# Add sudo no password rights
+sed -i 's/^# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
+
+# Remove no password sudo rights
+sed -i 's/^%wheel ALL=(ALL) NOPASSWD: ALL/# %wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
+
+# Add sudo rights
+sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+
+#Add parallel downloading
+sed -i 's/^#Para/Para/' /etc/pacman.conf
+
+#Enable multilib
+sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+pacman -Sy --noconfirm
+
+echo -e "\nINSTALLING AUR SOFTWARE\n"
+# You can solve users running this script as root with this and then doing the same for the next for statement. However I will leave this up to you.
+
+echo "CLONING: YAY"
+cd ~
+git clone "https://aur.archlinux.org/yay.git"
+cd ${HOME}/yay
+makepkg -si --noconfirm
+
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
