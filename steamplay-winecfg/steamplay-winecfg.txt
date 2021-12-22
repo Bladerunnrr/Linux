@@ -1,0 +1,9 @@
+
+
+Dark Souls
+
+Run below command in terminal
+
+WINEPREFIX=/home/bladerunner/.local/share/Steam/steamapps/compatdata/211420/pfx/ winecfg
+
+In winetricks, try setting dinput8 to (native, built-in).
